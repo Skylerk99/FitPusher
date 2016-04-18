@@ -1,0 +1,10 @@
+Package: com.skylerk99.fitpusher
+Name: FitPusher
+Depends: mobilesubstrate, applist
+Architecture: iphoneos-arm
+Description: Push all notifications to fitbit trackers.
+Maintainer: Skyler Kansala <skylerk99@gmail.com>
+Author: Skyler Kansala <skylerk99@gmail.com>
+Section: Tweaks
+Version: 0.0.2
+Installed-Size: 280
