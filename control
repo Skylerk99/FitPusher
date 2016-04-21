@@ -1,9 +1,9 @@
 Package: com.skylerk99.fitpusher
 Name: FitPusher
 Depends: mobilesubstrate, applist
-Version: 0.0.2
+Version: 0.0.4
 Architecture: iphoneos-arm
-Description: Push all notifications to fitbit trackers.
+Description: Push any notifications to fitbit trackers (Surge and Blaze).
 Maintainer: Skyler Kansala <skylerk99@gmail.com>
 Author: Skyler Kansala <skylerk99@gmail.com>
 Section: Tweaks

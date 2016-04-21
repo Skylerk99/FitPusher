@@ -1,4 +1,5 @@
 #import "Headers.h"
+#import <ZWEmoji.m>
 NSMutableDictionary *Wapplist = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/private/var/mobile/Library/Preferences/com.skylerk99.fitpusher.Wapplist.plist"];
 NSMutableDictionary *Bapplist = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/private/var/mobile/Library/Preferences/com.skylerk99.fitpusher.Bapplist.plist"];
 
@@ -8,19 +9,23 @@ NSMutableDictionary *Bapplist = [[NSMutableDictionary alloc] initWithContentsOfF
 static BOOL enable = YES;
 static BOOL success = YES;
 static BOOL timeStamp = NO;
+static BOOL ascii = NO;
+static BOOL emoji = NO;
 static CGFloat list = 1;
+NSString *testNotif;
 BBServer *bbServer;
+NSString *sendID;
 
 
 %hook BBServer
 - (void)publishBulletin:(BBBulletin*)bulletin destinations:(unsigned long long)arg2 alwaysToLockScreen:(BOOL)arg3
 //- (void)_addBulletin:(BBBulletin*)bulletin
 {
+    %orig;
 
 	if (enable)
 	{
-		%orig;
-		BBBulletin *bulletin2 = [[BBBulletin alloc] init];
+        BBBulletin *bulletin2 = [[BBBulletin alloc] init];
 		NSString *title = bulletin.title;
 		NSString *rand = bulletin.bulletinID;
 		NSString *id = bulletin.sectionID;
@@ -29,12 +34,13 @@ BBServer *bbServer;
 		NSDate *date = bulletin.date;
 		NSString *recordID = bulletin.recordID;
 		NSString *send;
-		NSString *sendID = @"com.apple.MobileSMS";
-		NSString* name = [[id componentsSeparatedByString:@"."] lastObject];
+		//NSString *sendID = @"com.apple.MobileSMS";
+	//	NSString* name = [[id componentsSeparatedByString:@"."] lastObject];
 		NSDate * previousDate = [NSDate date];
 		NSDate *newDate = [previousDate dateByAddingTimeInterval:25];
-		NSString *firstCapChar = [[name substringToIndex:1] capitalizedString];
-		NSString *Title = [name stringByReplacingCharactersInRange:NSMakeRange(0,1) withString:firstCapChar];
+	//	NSString *firstCapChar = [[name substringToIndex:1] capitalizedString];
+	//	NSString *Title = [name stringByReplacingCharactersInRange:NSMakeRange(0,1) withString:firstCapChar];
+        SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:id];
 
 		NSString *sms = @"com.apple.MobileSMS";
 		NSString *weather = @"com.apple.weather.today";
@@ -52,16 +58,13 @@ BBServer *bbServer;
 			bulletin.expirationDate = newDate;
 		}
 
+        if (sendID == nil)
+        {
+            sendID = sms;
+        }
 		if (title == nil)
-		{
-			if([id isEqualToString:@"com.toyopagroup.picaboo"])
-			{
-				title = @"Snapchat";
-			}
-			else
-			{
-				title = Title;
-			}
+        {
+				title = app.displayName;
 		}
 
 		if (message == nil)
@@ -102,9 +105,34 @@ BBServer *bbServer;
 		//		NSString *str2 = [NSString stringWithFormat:@"stb -b com.apple.mobilecal -n -t \"%@\" -m \"%@\" -s FitPusher", title, notif];
 		//		const char *ptr = [str cStringUsingEncoding: NSUTF8StringEncoding];
 		//		const char *ptr2 = [str2 cStringUsingEncoding: NSUTF8StringEncoding];
-
+        
+        notif = [notif stringByReplacingOccurrencesOfString:@"⁠" withString:@""];
+        notif = [notif stringByReplacingOccurrencesOfString:@"‎" withString:@""];
+        notif = [notif stringByReplacingOccurrencesOfString:@"‎" withString:@""];
+        if (emoji)
+        {
+        notif = [ZWEmoji unemojify:notif];
+        }
+        
+     //   NSCharacterSet *charactersToRemove = [[NSCharacterSet alphanumericCharacterSet] invertedSet];
+     //   notif = [[notif componentsSeparatedByCharactersInSet:charactersToRemove] componentsJoinedByString:@""];
+        
+        if (ascii)
+        {
+        NSMutableString *asciiCharacters = [NSMutableString string];
+        for (NSInteger i = 32; i < 127; i++)  {
+            [asciiCharacters appendFormat:@"%c", i];
+        }
+        
+        NSCharacterSet *nonAsciiCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:asciiCharacters] invertedSet];
+        
+        notif = [[notif componentsSeparatedByCharactersInSet:nonAsciiCharacterSet] componentsJoinedByString:@""];
+        }
+        
+        
 		bulletin2.sectionID =  sendID;
-		bulletin2.title =  title;
+		bulletin2.title = title;
+        //bulletin2.bulletinID = id;
 		bulletin2.message  = notif;
 		bulletin2.clearable = YES;
 		bulletin2.bulletinID = [NSString stringWithFormat:@"%@-%@", rand, [NSString stringWithFormat:@"%d", arc4random_uniform(21474836)]];
@@ -162,13 +190,12 @@ BBServer *bbServer;
 		NSLog(@"	universalSectionID:FITPUSH: %@",	 bulletin.	universalSectionID);
 		NSLog(@"	unlockActionLabel:FITPUSH: %@",	 bulletin.	unlockActionLabel);
 		NSLog(@"	unlockActionLabelOverride:FITPUSH: %@",	 bulletin.	unlockActionLabelOverride);
-		NSLog(@"	unlockActionLabelOverride:FITPUSH: %@",	 bulletin.	unlockActionLabelOverride);
+        NSLog(@"	NAME:FITPUSH: %@", app.displayName);
 
 	}
 
 	else
 	{
-		%orig;
 	}
 }
 %end
@@ -237,8 +264,8 @@ BBServer *bbServer;
 	dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
 	dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
 		[bluetooth _updateState];
-
 		[bluetooth _toggleState];
+
 		NSLog(@"TOGGLE 1");
 	});
 
@@ -263,6 +290,7 @@ BBServer *bbServer;
 			bulletin.date = [NSDate date];
 			bulletin.publicationDate = [NSDate date];
 			bulletin.lastInterruptDate = [NSDate date];
+            bulletin.sound = nil;
 			SystemSoundID lowSound;
 			AudioServicesCreateSystemSoundID((CFURLRef)[NSURL fileURLWithPath:lowsound isDirectory:NO],&lowSound);
 			if(lowSound) bulletin.sound=[BBSound alertSoundWithSystemSoundID:lowSound];
@@ -270,17 +298,40 @@ BBServer *bbServer;
 				[bbServer publishBulletin:bulletin destinations:14 alwaysToLockScreen:YES];
 		}
 	});
+
 }
 %end
 
 
 static void showTestBanner() {
+    
+        NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.skylerk99.fitpusher.plist"];
+        if(prefs)
+        {
+            enable = [prefs objectForKey:@"enable"] ? [[prefs objectForKey:@"enable"] boolValue] : enable;
+            emoji = [prefs objectForKey:@"emoji"] ? [[prefs objectForKey:@"emoji"] boolValue] : emoji;
+            timeStamp = [prefs objectForKey:@"timeStamp"] ? [[prefs objectForKey:@"timeStamp"] boolValue] : timeStamp;
+            ascii = [prefs objectForKey:@"ascii"] ? [[prefs objectForKey:@"ascii"] boolValue] : ascii;
+            success = [prefs objectForKey:@"success"] ? [[prefs objectForKey:@"success"] boolValue] : success;
+            list = [prefs objectForKey:@"list"] ? [[prefs objectForKey:@"list"] floatValue] : list;
+            testNotif = [prefs objectForKey:@"testNotif"] ? [prefs objectForKey:@"testNotif"] : testNotif;
+            sendID = [prefs objectForKey:@"sendID"] ? [prefs objectForKey:@"sendID"] : sendID;
+        }
+        [prefs release];
+    
+    
+    if (testNotif.length == 0) {
+        testNotif = @"Test Notification";
+    }
+    NSDate * previousDate = [NSDate date];
+    NSDate *newDate = [previousDate dateByAddingTimeInterval:25];
 	BBBulletin *bulletin = [[BBBulletin alloc] init];
 	bulletin.sectionID =  @"com.fitbit.FitbitMobile";
 	bulletin.title =  @"Fitbit Watch";
-	bulletin.message  = @"Your Fitbit watch is now connected";
+    bulletin.expirationDate = newDate;
+	bulletin.message  = testNotif;
 	bulletin.clearable = YES;
-	bulletin.subtitle = @"FitPusher";
+	//bulletin.subtitle = @"FitPusher";
 	bulletin.bulletinID = [NSString stringWithFormat:@"%@-%@", [NSString stringWithFormat:@"%d", arc4random_uniform(21474836)], [NSString stringWithFormat:@"%d", arc4random_uniform(21474836)]];
 	bulletin.date = [NSDate date];
 	bulletin.publicationDate = [NSDate date];
@@ -298,10 +349,15 @@ static void loadPrefs()
 	NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.skylerk99.fitpusher.plist"];
 	if(prefs)
 	{
-		enable = [prefs objectForKey:@"enable"] ? [[prefs objectForKey:@"enable"] boolValue] : enable;
-		timeStamp = [prefs objectForKey:@"timeStamp"] ? [[prefs objectForKey:@"timeStamp"] boolValue] : timeStamp;
+        enable = [prefs objectForKey:@"enable"] ? [[prefs objectForKey:@"enable"] boolValue] : enable;
+        emoji = [prefs objectForKey:@"emoji"] ? [[prefs objectForKey:@"emoji"] boolValue] : emoji;
+        timeStamp = [prefs objectForKey:@"timeStamp"] ? [[prefs objectForKey:@"timeStamp"] boolValue] : timeStamp;
+        ascii = [prefs objectForKey:@"ascii"] ? [[prefs objectForKey:@"ascii"] boolValue] : ascii;
 		success = [prefs objectForKey:@"success"] ? [[prefs objectForKey:@"success"] boolValue] : success;
-		list = [prefs objectForKey:@"list"] ? [[prefs objectForKey:@"list"] floatValue] : list;
+        list = [prefs objectForKey:@"list"] ? [[prefs objectForKey:@"list"] floatValue] : list;
+        testNotif = [prefs objectForKey:@"testNotif"] ? [prefs objectForKey:@"testNotif"] : testNotif;
+        sendID = [prefs objectForKey:@"sendID"] ? [prefs objectForKey:@"sendID"] : sendID;
+
 	}
 	[prefs release];
 }
@@ -312,7 +368,12 @@ static void loadPrefs()
 
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.skylerk99.fitpusher.settingschanged"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 	loadPrefs();
-	showTestBanner();
+    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
+                                    NULL,
+                                    (CFNotificationCallback)showTestBanner,
+                                    CFSTR("com.skylerk99.fitpusher/showtestbanner"),
+                                    NULL,
+                                    CFNotificationSuspensionBehaviorDeliverImmediately);
 
 
 }

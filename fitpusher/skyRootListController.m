@@ -33,7 +33,20 @@
 	//  system("killall -9 Music");
 }
 
-- (void)kill:(id)sender {
+-(void)showTestBanner{
+    [self.view endEditing:YES];
+    CFPreferencesAppSynchronize(CFSTR("com.skylerk99.fitpusher"));
+    CFNotificationCenterPostNotification(
+                                         CFNotificationCenterGetDarwinNotifyCenter(),
+                                         CFSTR("com.skylerk99.fitpusher/showtestbanner"),
+                                         NULL,
+                                         NULL,
+                                         YES
+                                         );
+}
+
+- (void)kill {
+    NSLog(@"KILLALL FITPUSH");
 	system("killall -9 SpringBoard");
 }
 @end

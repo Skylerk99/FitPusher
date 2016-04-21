@@ -132,7 +132,65 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.skylerk99.fitpusher.settingschanged</string>
+			<key>PostNotification</key>
+			<string>com.skylerk99.fitpusher.settingschanged</string>
+			<key>key</key>
+			<string>emoji</string>
+			<key>label</key>
+			<string>Convert Emojis to Text</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.skylerk99.fitpusher.settingschanged</string>
+			<key>PostNotification</key>
+			<string>com.skylerk99.fitpusher.settingschanged</string>
+			<key>key</key>
+			<string>ascii</string>
+			<key>label</key>
+			<string>Removes All Non-ASCII Characters </string>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>App to Spoof Notifications to</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSegmentCell</string>
+			<key>validTitles</key>
+			<array>
+				<string>Messages</string>
+				<string>Calendar</string>
+			</array>
+			<key>validValues</key>
+			<array>
+				<string>com.apple.MobileSMS</string>
+				<string>com.apple.mobilecal</string>
+			</array>
+			<key>default</key>
+			<string>com.apple.MobileSMS</string>
+			<key>defaults</key>
+			<string>com.skylerk99.fitpusher.settingschanged</string>
+			<key>PostNotification</key>
+			<string>com.skylerk99.fitpusher.settingschanged</string>
+			<key>key</key>
+			<string>sendID</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footText</key>
+			<string>Only adding/removing apps from black &amp; white lists need respring. All other changes are instant. </string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -140,7 +198,33 @@
 			<key>label</key>
 			<string>Respring </string>
 			<key>action</key>
-			<string>testBanner</string>
+			<string>kill</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Show Test Bulletin</string>
+			<key>action</key>
+			<string>showTestBanner</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>prompt</key>
+			<string>Test Message: </string>
+			<key>placeholder</key>
+			<string>Test Notification</string>
+			<key>bestGuess</key>
+			<string>Test Notification</string>
+			<key>label</key>
+			<string>Test Message: </string>
+			<key>defaults</key>
+			<string>com.skylerk99.fitpusher.settingschanged</string>
+			<key>PostNotification</key>
+			<string>com.skylerk99.fitpusher.settingschanged</string>
+			<key>key</key>
+			<string>testNotif</string>
 		</dict>
 	</array>
 	<key>title</key>

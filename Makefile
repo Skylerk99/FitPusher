@@ -2,7 +2,8 @@ GO_EASY_ON_ME=1
 
 ARCHS = armv7 arm64
 TARGET = iphone::9.2:9.0
-THEOS_DEVICE_IP = 192.168.2.69
+THEOS_DEVICE_IP = 10.36.58.8
+
 
 
 include $(THEOS)/makefiles/common.mk
